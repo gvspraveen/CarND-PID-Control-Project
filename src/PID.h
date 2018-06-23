@@ -17,6 +17,11 @@ public:
   double Ki;
   double Kd;
 
+  int num_steps;
+  int next_twiddle_param_index;
+  int twiddle_steps_interval;
+  double total_error;
+  double best_error;
   /*
   * Constructor
   */
