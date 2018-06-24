@@ -1,8 +1,14 @@
-#include <uWS/uWS.h>
+#include <stddef.h>
+#include <uWS/HTTPSocket.h>
+#include <uWS/Hub.h>
+#include <uWS/WebSocket.h>
+#include <uWS/WebSocketProtocol.h>
+#include <functional>
 #include <iostream>
+#include <string>
+
 #include "json.hpp"
 #include "PID.h"
-#include <math.h>
 
 // for convenience
 using json = nlohmann::json;
@@ -60,8 +66,9 @@ int main()
           * another PID controller to control the speed!
           */
           // bool should_run_twiddle = pid.num_steps > 500;
-          bool should_run_twiddle = false;
           bool should_reset = false;
+          bool should_run_twiddle = false;
+
           if (should_run_twiddle) {
             std::cout << "Params before twiddle: " << "P: " << pid.Kp << ", I: " << pid.Ki << ", D: " << pid.Kd << "\n";
             std::cout << "total_error: " << pid.total_error << "\n";
@@ -74,12 +81,13 @@ int main()
             pid.num_steps = 0;
             pid.total_error = 0;
 
+            if (should_reset) {
+                   std::cout << "==================== Resetting =========================\n";
+                   std::string reset_msg = "42[\"reset\",{}]";
+                   ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT);
+             }
           }
-          if (should_reset) {
-            std::cout << "==================== Resetting =========================\n";
-            std::string reset_msg = "42[\"reset\",{}]";
-            ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT);
-          }
+
           else {
             pid.UpdateError(cte);
              steer_value = pid.TotalError();
@@ -89,7 +97,7 @@ int main()
                   steer_value = -1.0;
              }
              // DEBUG
-             // std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+             std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
              json msgJson;
              msgJson["steering_angle"] = steer_value;
