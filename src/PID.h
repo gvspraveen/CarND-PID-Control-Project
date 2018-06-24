@@ -1,6 +1,10 @@
 #ifndef PID_H
 #define PID_H
 
+#include <vector>
+
+using namespace std;
+
 class PID {
 public:
   /*
@@ -16,12 +20,16 @@ public:
   double Kp;
   double Ki;
   double Kd;
+  vector<double> deltas;
+
 
   int num_steps;
   int next_twiddle_param_index;
-  int twiddle_steps_interval;
+  bool twiddle_param_added;
+  bool twiddle_param_subtracted;
   double total_error;
   double best_error;
+  bool twiddle_initialized;
   /*
   * Constructor
   */
@@ -41,6 +49,12 @@ public:
   * Update the PID error variables given cross track error.
   */
   void UpdateError(double cte);
+
+  /**
+   * Run twiddle periodically.
+   * Returns true if twiddle was run. false if pre checks for running twiddle fail.
+   */
+  bool runTwiddle(double cte);
 
   /*
   * Calculate the total PID error.
